@@ -1,2 +1,4 @@
 # ext-data-recovery
-Tries to recover ext3 and ext4 filesystem data using the journal
+When complete, this project will try to recover ext3 and ext4 filesystem data using the journal.
+
+
