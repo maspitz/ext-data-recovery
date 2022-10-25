@@ -2,12 +2,13 @@
 
 #include <com_err.h>
 #include <ext2fs/ext2_err.h>
+
 #include <ext2fs/ext2fs.h>
 
 const char *program_name = "ext-data-recovery";
 
 
-ext2_filsys open_filesystem(char *device) {
+ext2_filsys open_filesystem(const char *device) {
   ext2_filsys current_fs = NULL;
   blk64_t superblock = 0;
   blk64_t blocksize = 0;
@@ -51,7 +52,7 @@ void close_filesystem(ext2_filsys current_fs) {
 
 
 
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
   if (argc < 2) {
     fprintf(stderr, "Usage: %s filename\n", program_name);
     return 1;
@@ -61,8 +62,15 @@ int main(int argc, char **argv) {
 
   const char* fs_filename = argv[1];
 
+  ext2_filsys current_fs = NULL;
 
+  current_fs = open_filesystem(fs_filename);
+  if (current_fs == NULL) {
+    fprintf(stderr, "%s: Couldn't open filesystem.\n", program_name);
+    return 0;
+  }
 
+  close_filesystem(current_fs);
 
 /*  journal_t *journal; */
 
