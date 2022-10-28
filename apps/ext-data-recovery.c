@@ -1,9 +1,15 @@
 #include <stdio.h>
 
+/* com_err error handling */
 #include <com_err.h>
 #include <ext2fs/ext2_err.h>
 
+/* ext2/3/4 filesystem */
 #include <ext2fs/ext2fs.h>
+
+/* jbd2 journal (as adapted by e2fsprogs from linux kernel) */
+#include "journal/jfs_compat.h"
+#include "journal/journal.h"
 
 const char *program_name = "ext-data-recovery";
 
@@ -67,13 +73,38 @@ int main(int argc, const char **argv) {
   current_fs = open_filesystem(fs_filename);
   if (current_fs == NULL) {
     fprintf(stderr, "%s: Couldn't open filesystem.\n", program_name);
-    return 0;
+    return 1;
   }
 
+  printf("Filesystem %s:\n", fs_filename);
+  printf("%u inodes\n",current_fs->super->s_inodes_count);
+
+
+  journal_t *journal = NULL;
+  errcode_t err;
+
+
+  if (!ext2fs_has_feature_journal(current_fs->super)) {
+    com_err(program_name, 0, "Journalling not enabled on filesystem.");
+    return 1;
+  }
+
+  errcode_t retval;
+
+  retval = ext2fs_open_journal(current_fs, &journal);
+  if (retval) {
+    com_err(program_name, retval, "while opening journal");
+    return 1;
+  }
+
+
+  printf("JOURNAL: seq=%u tailseq=%u start=%lu first=%lu "
+         "maxlen=%lu\n",
+         journal->j_tail_sequence, journal->j_transaction_sequence,
+         journal->j_tail, journal->j_first, journal->j_last);
+
+  ext2fs_close_journal(current_fs, &journal);
   close_filesystem(current_fs);
-
-/*  journal_t *journal; */
-
 
   remove_error_table(&et_ext2_error_table);
 
