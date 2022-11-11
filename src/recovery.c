@@ -929,3 +929,66 @@ static int scan_revoke_records(journal_t *journal, struct buffer_head *bh,
 	}
 	return 0;
 }
+
+/****************************/
+/* Scan journal data blocks */
+/****************************/
+
+struct struct_journal_data_scan
+{
+	journal_t * journal;
+	char * data_buffer;
+	long data_block_nr;
+	int current_journal_block;
+	int start_journal_block;
+	char * descriptor_buffer;
+};
+
+errcode_t open_journal_data_scan(journal_t *journal, journal_data_scan *ret_scan) {
+	journal_data_scan scan;
+
+	scan = malloc(sizeof(struct struct_journal_data_scan));
+	if (!scan) {
+		return EXT2_ET_NO_MEMORY;
+	}
+	scan->journal = journal;
+	scan->data_buffer = malloc(sizeof(char) * journal->j_blocksize);
+	if (!scan->data_buffer) {
+		free(&scan);
+		return EXT2_ET_NO_MEMORY;
+	}
+	scan->descriptor_buffer = malloc(sizeof(char) * journal->j_blocksize);
+	if (!scan->descriptor_buffer) {
+		free(&scan);
+		free(scan->data_buffer);
+		return EXT2_ET_NO_MEMORY;
+	}
+
+	/* Find the start of the scan */
+
+	/*
+	 * We won't worry about commit blocks or transactions in general.  All that we want
+	 * are the data blocks and their associated descriptor blocks, so that we know where
+	 * the data was to be written.
+	 */
+
+	struct buffer_head * bh;
+
+
+}
+
+/* Returns 1 when a data block is read, or 0 if end of scan reached. */
+int get_journal_data(journal_data_scan scan) {
+	return 0;
+}
+
+void close_journal_data_scan(journal_data_scan scan) {
+	if (!scan)
+		return;
+	if (scan->data_buffer != NULL) {
+		free(&scan->data_buffer);
+		scan->data_buffer = NULL;
+	}
+	free(&scan);
+	return;
+}

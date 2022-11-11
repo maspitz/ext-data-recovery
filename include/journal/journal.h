@@ -23,3 +23,10 @@ void jbd2_revoke_csum_set(journal_t *j, struct buffer_head *bh);
 void jbd2_descr_block_csum_set(journal_t *j, struct buffer_head *bh);
 void jbd2_block_tag_csum_set(journal_t *j, journal_block_tag_t *tag,
 			     struct buffer_head *bh, __u32 sequence);
+
+/* Scan journal data blocks (journal.c) */
+
+typedef struct struct_journal_data_scan *journal_data_scan;
+
+errcode_t open_journal_data_scan(journal_t *journal);
+void close_journal_data_scan(journal_data_scan scan);
